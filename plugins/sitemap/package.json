@@ -1,0 +1,10 @@
+{
+  "name": "@netlify/sitemap-plugin",
+  "version": "0.0.3",
+  "description": "Generate a sitemap",
+  "main": "index.js",
+  "dependencies": {
+    "globby": "^10.0.1",
+    "sitemap": "^3.2.2"
+  }
+}

@@ -1,0 +1,27 @@
+# Build settings
+build:
+  functions: functions
+  publish: build
+  # Inline lifecycle hooks
+  lifecycle:
+    init:
+      - echo "starting the build"
+    preBuild:
+      - echo "Do thing before build"
+    build:
+      - npm run build
+    postBuild:
+      - echo "Do thing after build"
+    finally:
+      - echo "Ending the build"
+
+# Build plugins
+plugins:
+  pluginOne:
+    # Local path to plugin
+    type: ./plugins/one
+    config:
+      foo: bar
+  # sitemap plugin
+  sitemapPlugin:
+    type: '@netlify/sitemap-plugin'

@@ -4,8 +4,12 @@
   "version": "0.0.0",
   "description": "Much wow, awesome!",
   "scripts": {
-    "build": "mkdir -p build && cp src/index.html build"
+    "build": "mkdir -p build && cp src/index.html build",
+    "demo": "cp -R ./plugins/serverless/backend backend"
   },
   "author": "@DavidWells",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@netlify/sitemap-plugin": "0.0.3"
+  }
 }
