@@ -5,6 +5,7 @@ const execa = require('execa')
 
 module.exports = function serverlessPlugin(opts) {
   return {
+    name: 'serverless-plugin',
     // Deploy backend on preBuild
     preBuild: async () => {
       try {
