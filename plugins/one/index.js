@@ -2,6 +2,7 @@
 /* Netlify plugin example */
 function netlifyPlugin(config) {
   return {
+    name: 'my-plugin-one',
     init: () => {
       console.log('Hi from init')
     },
