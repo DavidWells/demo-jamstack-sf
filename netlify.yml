@@ -17,11 +17,9 @@ build:
 
 # Build plugins
 plugins:
-  pluginOne:
-    # Local path to plugin
-    type: ./plugins/one
+  # Local plugin
+  - type: ./plugins/one
     config:
       foo: bar
   # sitemap plugin
-  sitemapPlugin:
-    type: '@netlify/sitemap-plugin'
+  - type: '@netlify/sitemap-plugin'
