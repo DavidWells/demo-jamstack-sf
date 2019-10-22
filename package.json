@@ -10,6 +10,6 @@
   "author": "@DavidWells",
   "license": "MIT",
   "devDependencies": {
-    "@netlify/sitemap-plugin": "0.0.3"
+    "@netlify/plugin-sitemap": "0.0.3"
   }
 }

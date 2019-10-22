@@ -22,4 +22,4 @@ plugins:
     config:
       foo: bar
   # sitemap plugin
-  - type: '@netlify/sitemap-plugin'
+  - type: '@netlify/plugin-sitemap'
