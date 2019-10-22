@@ -6,6 +6,7 @@ const globby = require('globby')
 
 /* Export the sitemap plugin */
 module.exports = {
+  name: 'my-sitemaps',
   /* Create sitemap on postBuild step */
   postBuild: async ({ constants, pluginConfig }) => {
     const baseUrl = pluginConfig.baseUrl || process.env.SITE
