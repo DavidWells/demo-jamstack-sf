@@ -4,6 +4,7 @@ function netlifyPlugin(config) {
   return {
     init: () => {
       console.log('Hi from init')
+      throw new Error('ooooo no!')
     },
     preBuild: () => {
       console.log('Hi from preBuild')
