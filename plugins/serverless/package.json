@@ -10,7 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "execa": "^2.0.4",
+    "copy-dir": "^1.2.0",
+    "execa": "^3.4.0",
+    "is-invalid-path": "^1.0.2",
+    "mkdirp": "^0.5.1",
     "serverless": "^1.53.0"
   },
   "engines": {

@@ -1,53 +1,148 @@
-const { resolve, dirname, join } = require('path')
-const { promisify } = require('util')
 const fs = require('fs')
+const path = require('path')
 const execa = require('execa')
+const { promisify } = require('util')
+const mkdirp = require('mkdirp')
+const copy = require('copy-dir')
+const isInvalidPath = require('is-invalid-path')
+const hashDir = require('./utils/hashDir')
+const hashFile = require('./utils/hashFile')
+const makeDir = promisify(mkdirp)
+const statP = promisify(fs.stat)
 
-module.exports = function serverlessPlugin(opts) {
-  return {
-    name: 'serverless-plugin',
-    // Deploy backend on preBuild
-    preBuild: async () => {
-      try {
-        await runServerless('serverless deploy --verbose', opts)
-      } catch (err) {
-        console.log('err', err)
-        // throw new Error(err.message)
-      }
-    },
+async function isDirectory(filePath) {
+  validateFilePaths(filePath)
+  try {
+    const stats = await statP(filePath)
+    return stats.isDirectory()
+  } catch (e) {
+    return false
   }
 }
 
-async function isDirectory(filePath) {
-  try {
-    return (await promisify(fs.lstat)(filePath)).isDirectory()
-  } catch (e) {
-    return false // or custom the error
+/**
+ * validate File Paths
+ * @param  {array|string} filePaths - paths to validate
+ * @return {null}
+ */
+function validateFilePaths(filePaths) {
+  const paths = (Array.isArray(filePaths)) ? filePaths : [filePaths]
+  const invalidPaths = paths.filter((p) => {
+    return isInvalidPath(p)
+  }).map((p) => {
+    return `${p} is an invalid file path`
+  })
+
+  if (invalidPaths.length) {
+    throw new Error(invalidPaths.join(', '))
   }
+}
+
+async function copyDir(src, dest) {
+  // Validate file paths
+  validateFilePaths([ src, dest ])
+  // Ensure directory is created
+  await makeDir(dest)
+  // Then copy file
+  await copy(src, dest, {
+    utimes: true,  // keep add time and modify time
+    mode: true,    // keep file mode
+    cover: true    // cover file when exists, default is true
+  })
+}
+
+async function getFileDirectory(filePath) {
+  validateFilePaths(filePath)
+  if (await isDirectory(filePath)) {
+    return filePath
+  }
+  return path.dirname(filePath)
 }
 
 function fileExists(filePath) {
+  validateFilePaths(filePath)
   return new Promise((resolve, reject) => {
     fs.access(filePath, fs.F_OK, (err) => {
-      if (err) {
-        return resolve(false)
-      }
+      if (err) return resolve(false)
       return resolve(true)
     })
   })
 }
 
-async function resolveConfigPath(relativePath) {
-  const filePath = resolve(relativePath)
-  const isDir = isDirectory(filePath)
-  if (isDir) {
-    const slsFile = join(filePath, 'serverless.yml')
-    if (await fileExists(slsFile)) {
-      return filePath
-    }
-    return dirname(filePath)
+module.exports = function serverlessPlugin(opts) {
+  return {
+    name: 'serverless-plugin',
+    onInit: async ({ constants }) => {
+      const SERVERLESS_CACHE_DIR = path.resolve(constants.CACHE_DIR, '.serverless')
+      const SERVERLESS_HIDDEN_DIR = path.resolve(await getFileDirectory(opts.path), '.serverless')
+
+      if (await fileExists(SERVERLESS_CACHE_DIR)) {
+        console.log('Previous deployment here. Restore from cache')
+      } else {
+        console.log('nothing to restore')
+      }
+    },
+    // Deploy backend on preBuild
+    onPreBuild: async ({ constants }) => {
+      try {
+        await runServerless('serverless deploy --verbose', opts)
+      } catch (err) {
+        throw new Error(err.message)
+      }
+
+      const destination = path.resolve(constants.CACHE_DIR, '.serverless')
+      console.log('Cache dest', destination)
+      const source = path.resolve(await getFileDirectory(opts.path), '.serverless')
+      console.log('Cache source', source)
+
+      // If .serverless src dir exists, do stuff with it
+      if (await fileExists(source)) {
+        // Copy over the files
+        await copyDir(source, destination)
+        console.log(`${source} copied to ${destination}`)
+        const hash = await hashDir(source)
+        console.log('hash', hash)
+        const stateHash = await hashFile(path.resolve(source, 'serverless-state.json'))
+        console.log('stateHash', stateHash)
+      }
+    },
   }
-  return filePath
+}
+
+async function getServerlessDirectory(relativePath) {
+  const filePath = path.resolve(relativePath)
+  const slsPath = await getServerlessConfigPath(filePath)
+  return path.dirname(slsPath)
+}
+
+async function getServerlessConfigPath(filePath) {
+  const isDir = await isDirectory(filePath)
+  if (!isDir && !isServerlessFile(filePath)) {
+    throw new Error(`
+    Error with serverless "path" passed into the serverless plugin config.
+    Value "${filePath}" is invalid.
+    No serverless config found in that location.
+    Please double check this value and try again`)
+  }
+  const cleanPath = (isDir) ? filePath : path.dirname(filePath)
+  const yml = path.resolve(cleanPath, 'serverless.yml')
+  const yaml = path.resolve(cleanPath, 'serverless.yaml')
+  const json = path.resolve(cleanPath, 'serverless.json')
+  const js = path.resolve(cleanPath, 'serverless.js')
+  if (await fileExists(yml)) {
+    return yml
+  } else if (await fileExists(yaml)) {
+    return yaml
+  } else if (await fileExists(json)) {
+    return json
+  } else if (await fileExists(js)) {
+    return js
+  }
+  throw new Error(`No serverless config file found in ${filePath}`)
+}
+
+function isServerlessFile(filePath) {
+  return filePath.match(/serverless\.(yml|yaml|json|js\.yml)$/)
 }
 
 async function runServerless(cmd, opts) {
@@ -63,14 +158,14 @@ async function runServerless(cmd, opts) {
     // console.log(yml)
   }
 
-  // Todo fix bug with path resolution
-  const cwdPath = await resolveConfigPath(opts.path)
+  // Resolve the cwd of where serverless project lives
+  const cwdPath = await getServerlessDirectory(opts.path)
   console.log(`Running command "${cmd}"\nin directory ${cwdPath}`)
   const subprocess = execa(`${cmd}`, {
     cwd: cwdPath,
     shell: true,
     preferLocal: true,
-    localDir: resolve(__dirname),
+    localDir: path.resolve(__dirname),
     env: Object.assign({}, process.env, {
       AWS_ACCESS_KEY_ID: opts.AWS_ACCESS_KEY_ID,
       AWS_SECRET_ACCESS_KEY: opts.AWS_SECRET_ACCESS_KEY
@@ -81,8 +176,10 @@ async function runServerless(cmd, opts) {
     const { stdout } = await subprocess
     return stdout
   } catch (err) {
-    if (err.stdout.match(/The security token included in the request is invalid/)) {
-      console.log('Incorrect AWS credentials. Please double check AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY values')
+    if (err.stdout && err.stdout.match(/The security token included in the request is invalid/)) {
+      const msg = 'Incorrect AWS credentials. Please double check AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY values'
+      console.log(`>  ${msg}`)
+      throw new Error(msg)
     }
     throw new Error(err)
   }
