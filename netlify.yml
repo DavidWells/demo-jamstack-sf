@@ -4,15 +4,15 @@ build:
   publish: build
   # Inline lifecycle hooks
   lifecycle:
-    init:
+    onInit:
       - echo "starting the build"
-    preBuild:
+    onPreBuild:
       - echo "Do thing before build"
-    build:
+    onBuild:
       - npm run build
-    postBuild:
+    onPostBuild:
       - echo "Do thing after build"
-    finally:
+    onSuccess:
       - echo "Ending the build"
 
 # Build plugins
@@ -21,5 +21,9 @@ plugins:
   - type: ./plugins/one
     config:
       foo: bar
-  # sitemap plugin
-  - type: '@netlify/plugin-sitemap'
+  # Serverless framework plugin
+  - type: ./plugins/serverless
+    config:
+      path: ./backend
+      AWS_ACCESS_KEY_ID: ${env:MY_AWS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${env:MY_AWS_ACCESS_KEY}
