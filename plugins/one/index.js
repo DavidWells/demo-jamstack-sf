@@ -3,17 +3,17 @@
 function netlifyPlugin(config) {
   return {
     name: 'my-plugin-one',
-    init: () => {
+    onInit: () => {
       console.log('Hi from init')
     },
-    preBuild: () => {
+    onPreBuild: () => {
       console.log('Hi from preBuild')
     },
-    postBuild: () => {
+    onPostBuild: () => {
       console.log('Hi from postBuild')
     },
-    finally: () => {
-      console.log('Hi from finally')
+    onSuccess: () => {
+      console.log('Hi from onSuccess')
     }
   }
 }
