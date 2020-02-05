@@ -10,7 +10,7 @@ build:
       - echo "Do thing before build"
     onBuild:
       - npm run build
-      # - cp -r ./test-dir build
+      #- cp -r ./test-dir build
     onPostBuild:
       - echo "Do thing after build"
     onSuccess:
@@ -25,6 +25,9 @@ plugins:
   # - package: ./plugins/two
   #   config:
   #     foo: bar
+  - package: ./plugins/npm-stats
+    config:
+      npmUserName: davidwells
   # # Serverless framework plugin
   # - package: ./plugins/serverless
   #   config:
