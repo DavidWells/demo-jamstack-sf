@@ -1,14 +1,11 @@
 {
-  "name": "netlify-plugin-npm-stats-page",
+  "name": "netlify-plugin-my-npm-stats",
   "version": "1.0.0",
   "description": "Generate a page of your NPM stats",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "David Wells",
+  "license": "MIT",
   "dependencies": {
     "npmtotal": "^1.4.0"
   },
