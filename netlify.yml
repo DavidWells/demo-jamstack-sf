@@ -10,6 +10,7 @@ build:
       - echo "Do thing before build"
     onBuild:
       - npm run build
+      # - cp -r ./test-dir build
     onPostBuild:
       - echo "Do thing after build"
     onSuccess:
@@ -18,12 +19,15 @@ build:
 # Build plugins
 plugins:
   # Local plugin
-  - type: ./plugins/one
+  - package: ./plugins/one
     config:
       foo: bar
-  # Serverless framework plugin
-  - type: ./plugins/serverless
-    config:
-      path: ./backend
-      AWS_ACCESS_KEY_ID: ${env:MY_AWS_KEY}
-      AWS_SECRET_ACCESS_KEY: ${env:MY_AWS_ACCESS_KEY}
+  # - package: ./plugins/two
+  #   config:
+  #     foo: bar
+  # # Serverless framework plugin
+  # - package: ./plugins/serverless
+  #   config:
+  #     path: ./backend
+  #     AWS_ACCESS_KEY_ID: ${env:MY_AWS_KEY}
+  #     AWS_SECRET_ACCESS_KEY: ${env:MY_AWS_ACCESS_KEY}
