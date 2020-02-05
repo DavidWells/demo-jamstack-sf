@@ -1,5 +1,5 @@
 {
-  "name": "netlify-plugin-my-npm-stats",
+  "name": "netlify-plugin-npm-stats-page",
   "version": "1.0.0",
   "description": "Generate a page of your NPM stats",
   "main": "index.js",

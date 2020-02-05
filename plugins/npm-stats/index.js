@@ -5,7 +5,7 @@ const npmtotal = require('npmtotal')
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
 
-const NAME = 'netlify-plugin-my-npm-stats'
+const NAME = 'netlify-plugin-npm-stats-page'
 
 module.exports = (conf) => {
   return {
