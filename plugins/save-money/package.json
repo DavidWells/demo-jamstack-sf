@@ -1,0 +1,12 @@
+{
+  "name": "save-money",
+  "version": "1.0.0",
+  "description": "Save you money",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  }
+}
