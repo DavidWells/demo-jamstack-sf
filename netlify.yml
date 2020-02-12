@@ -19,15 +19,19 @@ build:
 # Build plugins
 plugins:
   # Local plugin
-  - package: ./plugins/one
-    config:
-      foo: bar
+  # - package: ./plugins/one
+  #   config:
+  #     foo: bar
   # - package: ./plugins/two
   #   config:
   #     foo: bar
-  - package: ./plugins/npm-stats
-    config:
-      npmUserName: davidwells
+  - package: ./plugins/netlify-plugin-debug-cache
+  # - package: ./plugins/save-money
+  #   config:
+  #     netlifyToken: 'xxx'
+  # - package: ./plugins/npm-stats
+  #   config:
+  #     npmUserName: davidwells
   # # Serverless framework plugin
   # - package: ./plugins/serverless
   #   config:

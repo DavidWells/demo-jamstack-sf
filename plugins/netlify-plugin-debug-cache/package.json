@@ -1,0 +1,12 @@
+{
+  "name": "netlify-plugin-debug-cache",
+  "version": "1.0.0",
+  "description": "Debug what is in your Netlify Build Cache",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "whats-in-the-cache": "^1.0.0"
+  }
+}
