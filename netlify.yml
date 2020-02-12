@@ -25,7 +25,7 @@ plugins:
   # - package: ./plugins/two
   #   config:
   #     foo: bar
-  - package: ./plugins/netlify-plugin-debug-cache
+  - package: netlify-plugin-debug-cache
   # - package: ./plugins/save-money
   #   config:
   #     netlifyToken: 'xxx'
