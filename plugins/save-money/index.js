@@ -17,7 +17,7 @@ function netlifyPlugin(config) {
       const stats = await getBuildStats(teamName, netlifyToken)
 
       const account = await getAccountDetails(teamName, netlifyToken)
-      const { capabilities } = account
+      const capabilities = account.capabilities || { build_minutes: { included: 300 } }
       const allowedBuildMinutes = capabilities.build_minutes.included
       const currentBuildMinutes = stats.minutes.current
 
@@ -46,7 +46,6 @@ async function getSiteInfo(siteId, apiToken) {
 }
 
 async function getBuildStats(teamName, apiToken) {
-  console.log('Get Build Stats')
   const response = await fetch(`https://api.netlify.com/api/v1/${teamName}/builds/status`, {
     method: 'GET',
     headers: {

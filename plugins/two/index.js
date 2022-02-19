@@ -5,7 +5,7 @@ module.exports = () => {
     async onPreBuild({ netlifyConfig, utils }) {
       const { cache } = utils
       const filePath = `${netlifyConfig.build.publish}/test-dir`
-
+      console.log('filePath', filePath)
       const hasCache = await cache.has([ filePath ])
 
       if (hasCache) {

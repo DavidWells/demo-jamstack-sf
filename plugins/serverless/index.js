@@ -45,9 +45,9 @@ async function copyDir(src, dest) {
   await makeDir(dest)
   // Then copy file
   await copy(src, dest, {
-    utimes: true,  // keep add time and modify time
-    mode: true,    // keep file mode
-    cover: true    // cover file when exists, default is true
+    utimes: true, // keep add time and modify time
+    mode: true, // keep file mode
+    cover: true // cover file when exists, default is true
   })
 }
 
@@ -72,9 +72,14 @@ function fileExists(filePath) {
 module.exports = function serverlessPlugin(opts) {
   return {
     name: 'serverless-plugin',
-    onInit: async ({ constants }) => {
+    onInit: async ({ constants, utils }) => {
       const SERVERLESS_CACHE_DIR = path.resolve(constants.CACHE_DIR, '.serverless')
       const SERVERLESS_HIDDEN_DIR = path.resolve(await getFileDirectory(opts.path), '.serverless')
+      const hasFileCached = await utils.cache.has(SERVERLESS_HIDDEN_DIR)
+      
+      if (hasFileCached && constants.IS_LOCAL) {
+        await utils.cache.restore(SERVERLESS_HIDDEN_DIR)
+      }
 
       if (await fileExists(SERVERLESS_CACHE_DIR)) {
         console.log('Previous deployment here. Restore from cache')
@@ -83,7 +88,7 @@ module.exports = function serverlessPlugin(opts) {
       }
     },
     // Deploy backend on preBuild
-    onPreBuild: async ({ constants }) => {
+    onPreBuild: async ({ constants, utils }) => {
       try {
         await runServerless('serverless deploy --verbose', opts)
       } catch (err) {
@@ -97,6 +102,7 @@ module.exports = function serverlessPlugin(opts) {
 
       // If .serverless src dir exists, do stuff with it
       if (await fileExists(source)) {
+        await utils.cache.save([ source ], { ttl: 3600 })
         // Copy over the files
         await copyDir(source, destination)
         console.log(`${source} copied to ${destination}`)
